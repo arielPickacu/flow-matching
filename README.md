@@ -1,4 +1,5 @@
 # flow-matching
+```
 graph TD
     subgraph "3D Input"
         Video[Video Latents (H x W x Time)] --> Patches[3D Patches]
@@ -22,3 +23,4 @@ graph TD
 
     MLP --> Unpatch[Unpatchify]
     Unpatch --> Output[Generated Video]
+```
