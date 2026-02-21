@@ -1,0 +1,29 @@
+# Python caches and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+# Virtual environments
+venv/
+env/
+.env
+
+# PyTorch Model Weights and Checkpoints
+*.pth
+*.pt
+*.ckpt
+*.bin
+*.safetensors
+
+# Datasets and Precomputed Embeddings
+*.npy
+*.npz
+*.csv
+data/
+datasets/
+coco2017/
+
+# OS generated files
+.DS_Store
+Thumbs.db

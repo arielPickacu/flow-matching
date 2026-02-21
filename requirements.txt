@@ -1,0 +1,16 @@
+# Core ML
+torch
+torchvision
+numpy
+
+# Model Architecture Dependencies
+timm
+rotary-embedding-torch
+
+# Utilities & Visualization
+tqdm
+matplotlib
+torchinfo
+
+# Integration
+huggingface-hub
