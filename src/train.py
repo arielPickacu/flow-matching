@@ -67,7 +67,7 @@ def load():
     model = SiT(input_size=64,in_channels=3, text_size=512, depth=12, hidden_size=512, patch_size=4, num_heads=16, learn_sigma=False)
     optim = torch.optim.AdamW(model.parameters(), lr=1e-4)
     model.to(device)
-    checkpoint = torch.load("/workspace/flow_matching_with_text_n.tar", weights_only=True)
+    checkpoint = torch.load("/models/flow_matching_with_text_n.tar", weights_only=True)
     model.load_state_dict(checkpoint['model_state_dict'])
     optim.load_state_dict(checkpoint['optimizer_state_dict'])
     total_training_steps = 1849 * 200
@@ -77,7 +77,7 @@ def load():
     model.train()
 
     ema_model = copy.deepcopy(model).eval().requires_grad_(False).to(device)
-    ema_model.load_state_dict(torch.load("/workspace/ema_flow_matching_text_n.pt", weights_only=True))
+    ema_model.load_state_dict(torch.load("/models/ema_flow_matching_text_n.pt", weights_only=True))
     ema_model.eval()
     ema_model.train()
     return model,ema_model,optim,scheduler
@@ -88,7 +88,7 @@ def save(model,ema_model,optim):
             'optimizer_state_dict': optim.state_dict(),
             "scheduler": scheduler.state_dict(),
             }, "/workspace/flow_matching_with_text_n.tar")
-    torch.save(ema_model.state_dict(),"/workspace/ema_flow_matching_text_n.pt" )
+    torch.save(ema_model.state_dict(),"/models/ema_flow_matching_text_n.pt" )
 
 def get_loader(root = "train2017",annFile = "annotations/annotations/captions_train2017.json"):
     transform = T.Compose([

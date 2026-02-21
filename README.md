@@ -42,11 +42,14 @@ chmod +x download_coco.sh
 ./download_coco.sh
 ```
 
+clip preprocess:
+python preprocess_clip.py
 🚀 Training
 Once the dataset and dependencies are set up, you can start the training process:
 ```bash
 python train.py
 ```
-
+generate:
+you can generate in notebook. (run the import part, download the model with the correct path and run the generate part)
 📜 License
 MIT

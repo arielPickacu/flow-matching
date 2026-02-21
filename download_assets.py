@@ -3,8 +3,7 @@ from huggingface_hub import hf_hub_download, snapshot_download
 
 # --- CONFIGURATION ---
 # Replace these with your actual Hugging Face repository names!
-MODEL_REPO = "your-username/sit-cifar10-model"
-DATA_REPO = "your-username/coco-clip-embeddings"
+MODEL_REPO = "arielPickacu/Sit_Recreation"
 # ---------------------
 
 def download_weights():
@@ -14,24 +13,17 @@ def download_weights():
     # Downloads the specific model.pth file
     model_path = hf_hub_download(
         repo_id=MODEL_REPO, 
-        filename="model.pth", 
+        filename="ema_flow_matching_text_n.pt", 
+        local_dir="models" # Saves it to a local folder named 'models'
+    )
+    ema_model_path = hf_hub_download(
+        repo_id=MODEL_REPO, 
+        filename="flow_matching_with_text_n.tar", 
         local_dir="models" # Saves it to a local folder named 'models'
     )
     print(f"Model downloaded to: {model_path}")
-
-def download_dataset():
-    print("Downloading precomputed CLIP dataset...")
-    os.makedirs("data", exist_ok=True)
-    
-    # Downloads the entire dataset repository (e.g., your .pt or .npy files)
-    dataset_path = snapshot_download(
-        repo_id=DATA_REPO, 
-        repo_type="dataset",
-        local_dir="data"
-    )
-    print(f"Dataset downloaded to: {dataset_path}")
+    print(f"EmaModel downloaded to: {ema_model_path}")
 
 if __name__ == "__main__":
     download_weights()
-    download_dataset()
     print("All assets downloaded successfully!")
