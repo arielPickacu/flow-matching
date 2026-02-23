@@ -24,7 +24,7 @@ class EMA:
 
     def update_average(self, old, new):
         if old is None:
-            return newa
+            return new
         return old * self.beta + (1 - self.beta) * new
 
     def step_ema(self, ema_model, model, step_start_ema=2000):

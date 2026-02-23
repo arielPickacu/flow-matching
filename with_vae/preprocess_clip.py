@@ -1,75 +1,59 @@
 import os
+import json
 import torch
-from PIL import Image
-from diffusers import AutoencoderKL
-from torchvision import transforms
+from transformers import CLIPProcessor, CLIPTextModel
 from tqdm import tqdm
 
 # --- CONFIGURATION ---
-IMAGES_DIR = "/workspace/coco2017/train2017" # Point this to your extracted COCO images
-OUTPUT_FILE = "coco_vae_latents.pt"
-BATCH_SIZE = 64 
+ANNOTATIONS_PATH = "/workspace/coco2017/annotations/annotations/captions_train2017.json"
+OUTPUT_FILE = "coco_clip_text_embeddings.pt"
+BATCH_SIZE = 256
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 # ---------------------
 
 def main():
-    print(f"Loading VAE model on {DEVICE}...")
-    vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-mse").to(DEVICE)
-    vae.requires_grad_(False)
-    vae.eval()
+    print(f"Loading CLIP model on {DEVICE}...")
+    model = CLIPTextModel.from_pretrained("openai/clip-vit-base-patch32").to(DEVICE)
+    processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
     
-    # Dynamically grab the correct scaling factor (usually ~0.18215)
-    scaling_factor = vae.config.scaling_factor
+    print("Loading COCO annotations...")
+    with open(ANNOTATIONS_PATH, 'r') as f:
+        coco_data = json.load(f)
+        
+    annotations = coco_data['annotations']
+    print(f"Found {len(annotations)} captions.")
 
-    print(f"Scanning images in {IMAGES_DIR}...")
-    image_filenames = [f for f in os.listdir(IMAGES_DIR) if f.endswith(".jpg")]
-    print(f"Found {len(image_filenames)} images.")
-
-    # The VAE expects inputs normalized between -1 and 1
-    transform = transforms.Compose([
-        transforms.Resize((256,256)),
-        transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    ])
-
-    # Dictionary to map image_id to its latent tensor
-    latents_dict = {}
+    # Dictionary to map image_id to its text embeddings
+    # Note: COCO has ~5 captions per image, we will store them in a list per image_id
+    embeddings_dict = {}
     
     # Process in batches for speed
-    for i in tqdm(range(0, len(image_filenames), BATCH_SIZE), desc="Processing Images"):
-        batch_filenames = image_filenames[i:i + BATCH_SIZE]
-        batch_images = []
-        batch_ids = []
+    for i in tqdm(range(0, len(annotations), BATCH_SIZE), desc="Processing Captions"):
+        batch_anns = annotations[i:i + BATCH_SIZE]
+        texts = [ann['caption'] for ann in batch_anns]
+        image_ids = [ann['image_id'] for ann in batch_anns]
         
-        for filename in batch_filenames:
-            # COCO filenames are zero-padded IDs (e.g., '000000391895.jpg')
-            # Stripping the extension and converting to int matches the JSON image_id
-            img_id = int(filename.split('.')[0])
-            batch_ids.append(img_id)
-            
-            # Load, convert to RGB (to avoid grayscale channel errors), and transform
-            img_path = os.path.join(IMAGES_DIR, filename)
-            img = Image.open(img_path).convert("RGB")
-            batch_images.append(transform(img))
-            
-        # Stack into a single tensor: (B, 3, 256, 256) and push to GPU
-        inputs = torch.stack(batch_images).to(DEVICE)
+        # Tokenize and push to GPU
+        inputs = processor(text=texts, return_tensors="pt", padding=True, truncation=True).to(DEVICE)
         
         with torch.no_grad():
-            # Encode to distribution, sample, and scale
-            latent_dist = vae.encode(inputs).latent_dist
-            latents = latent_dist.sample() * scaling_factor
+            # Get the pooled output (e.g., 512-dimensional vector)
+            outputs = model(**inputs)
+            text_embeds = outputs.pooler_output.cpu() 
             
-            # Move off GPU to prevent RAM explosion during dictionary storage
-            latents = latents.cpu()
-            
-        # Store in dictionary (Shape per image: 4, 32, 32)
-        for img_id, latent in zip(batch_ids, latents):
-            latents_dict[img_id] = latent
+        # Store in dictionary
+        for img_id, emb in zip(image_ids, text_embeds):
+            if img_id not in embeddings_dict:
+                embeddings_dict[img_id] = []
+            embeddings_dict[img_id].append(emb)
 
-    print(f"Saving precomputed latents to {OUTPUT_FILE}...")
-    torch.save(latents_dict, OUTPUT_FILE)
-    print("Done! Both your visual and text representations are now cached.")
+    # Stack the lists into tensors for each image
+    for img_id in embeddings_dict:
+        embeddings_dict[img_id] = torch.stack(embeddings_dict[img_id])
+
+    print(f"Saving precomputed embeddings to {OUTPUT_FILE}...")
+    torch.save(embeddings_dict, OUTPUT_FILE)
+    print("Done! You can now upload this file to your Hugging Face Dataset Hub.")
 
 if __name__ == "__main__":
     main()
