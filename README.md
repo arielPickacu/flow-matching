@@ -59,13 +59,7 @@ Run the generator:
 cd with_vae
 python generate.py
 ```
-## 🚀 Project Overview
-* **Backbone:** SiT-B/2 (Base Transformer, Patch Size 2)
-* **Framework:** Flow Matching / Velocity Prediction
-* **Interpolant:** Linear (Optimal Transport)
-* **Conditioning:** Text-to-Image via CLIP-ViT-B/32 (pooler output)
-* **Compression:** Latent space training via pre-trained SD-VAE (8x downsampling)
-* **Dataset:** MS-COCO 2017
+
 ## 📜 Acknowledgments & Attributions
 
 This project is built upon the foundational work of the generative AI research community:
@@ -88,11 +82,10 @@ OpenAI.
 
 Dataset
 
-```
 * **MS-COCO**: This model is trained on the Microsoft COCO: Common Objects in Context
 dataset. Annotations are provided by the COCO Consortium under a CC BY 4.0 license.
 Citation: Lin, T. Y., et al. (2014). "Microsoft COCO: Common Objects in Context."
-```
+
 ## ⚖ License
 
 The code, configuration files, and trained model weights in this repository are released under
