@@ -39,9 +39,8 @@ _(Note: (it may miss some of them) Ensure you have_ pytorch-fid _installed for b
 2. High-Speed Data Download
 
 You can download and extract the COCO dataset using parallel streams via aria2c. Create a
-file named setup_coco.sh and run it:
+file named setup_coco.sh and run it.
 
-```
 ## 🖼 Inference & Generation
 
 The primary latent flow-matching code is located in the with_vae/ directory. The generator
