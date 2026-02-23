@@ -1,4 +1,5 @@
 # Scalable Interpolant Transformer (SiT) for Text-to-Image
+# this is recreation of SiT trained on coco (RTX4090 SiT B(patch 2))if you truly want to learn about it go to the SiT paper
 
 # Generation
 
@@ -25,6 +26,10 @@ The model achieved an FID score of 61 after approximately 200 epochs (~370,000 s
 single RTX 4090. This score represents a strong baseline for text-conditional generation on the
 highly complex, multi-object COCO dataset given the compute and time constraints.
 
+## model
+I made two models one with vae one withought they are in hugging face:
+[arielPickacu/SiT_withVAE_recreation](https://huggingface.co/arielPickacu/SiT_withVAE_recreation)
+[arielPickacu/Sit_Recreation](https://huggingface.co/arielPickacu/Sit_Recreation)
 ## 📥 Setup and Data
 
 1. Dependencies
