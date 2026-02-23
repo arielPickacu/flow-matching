@@ -44,8 +44,7 @@ You can download and extract the COCO dataset using parallel streams via aria2c.
 file named setup_coco.sh and run it:
 
 
-```
-#!/bin/bash
+```bash
 set -e
 BASE_DIR="/workspace/coco2017"
 CONNECTIONS=
